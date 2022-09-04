@@ -36,7 +36,7 @@ ouput.txt:
 1
 Цемент
 
-ouput.txt:
+output.txt:
 Бетон с присадкой:Цемент
 
 

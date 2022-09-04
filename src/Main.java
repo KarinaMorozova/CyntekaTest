@@ -1,37 +1,70 @@
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 
 public class Main {
-    // пример №2 нерелевантен, там 0 совпадений слов. Можно попробовать реализовать через список синонимов,
-    // но тогда придется все слова файла сверять с этим списком, это умножит время.
+    public static BufferedReader reader;
+    public static Map<String, List<String>> synMap;
+    public static boolean isChecked = false;
 
-    public static void main(String[] args) {
-        File file = new File("C://IDEA_project/input.txt");
+    static
+    {
+        try {
+            FileReader fr = new FileReader(System.getProperty("user.dir")
+                    + File.separator + "src"
+                    + File.separator + "resources"
+                    + File.separator + "synonyms.txt");
+            synMap = new HashMap<>();
+            List<String> list;
+            reader = new BufferedReader(fr);
+
+            String temp;
+            while ((temp = reader.readLine()) != null) {
+                String[] arr = temp.split(" ");
+                String[] dest = new String[arr.length - 1];
+                System.arraycopy(arr, 1, dest, 0, dest.length);
+
+                list = Arrays.stream(dest).toList();
+                synMap.put(arr[0], list);
+            }
+            reader.close();
+
+        } catch (IOException e) {
+            synMap = null;
+        }
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        reader = new BufferedReader(new InputStreamReader(System.in));
+
+        // Ввод пути до файла с консоли
+        System.out.println("Введите путь до файла input.txt через Enter");
+        String fileName = reader.readLine();
+        File file = new File(fileName);
+        System.out.println("Искать в файле синонимов? (Y\\N)");
+        isChecked = reader.readLine().trim().equals("Y");
+
         // список свойств
         ArrayList<String> properties = new ArrayList<>();
         // список подходящих значений
         ArrayList<String> values = new ArrayList<>();
 
-        try {
-            //создаем объект FileReader для объекта File
-            FileReader fr = new FileReader(file);
-            //создаем BufferedReader с существующего FileReader для построчного считывания
-            BufferedReader reader = new BufferedReader(fr);
+        //создаем объект FileReader для объекта File
+        FileReader fr = new FileReader(file);
+        //BufferedReader с существующего FileReader для построчного считывания
+        reader = new BufferedReader(fr);
 
-            int n = Integer.parseInt(reader.readLine());
-            for (int i = 0; i < n; i++) {
-                properties.add(reader.readLine());
-            }
-
-            int m = Integer.parseInt(reader.readLine());
-            for (int i = 0; i < m; i++) {
-                values.add(reader.readLine());
-            }
-
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        int n = Integer.parseInt(reader.readLine());
+        for (int i = 0; i < n; i++) {
+            properties.add(reader.readLine());
         }
 
+        int m = Integer.parseInt(reader.readLine());
+        for (int i = 0; i < m; i++) {
+            values.add(reader.readLine());
+        }
+
+        // результирующий список
         ArrayList<String> result = new ArrayList<>();
         // идем по списку свойств
         for (String property : properties) {
@@ -53,6 +86,15 @@ public class Main {
                             // если есть совпадение по 1 слову, составляем временную строку свойство:значение
                             temp = property + ":" + value;
                             break;
+                        } else {
+                            if (isChecked && (synMap != null) && synMap.containsKey(sProp.toLowerCase())) {
+                                List<String> list = synMap.get(sProp.toLowerCase());
+                                // если есть совпадение по 1 слову, составляем временную строку свойство:значение
+                                if (list.contains(sValue.toLowerCase())) {
+                                    temp = property + ":" + value;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -93,7 +135,8 @@ public class Main {
         result.addAll(addition);
 
         // записываем результат в файл
-        try( FileWriter writer = new FileWriter("C://IDEA_project/output.txt")) {
+        System.out.println("Файл output.txt находится по пути " + System.getProperty("user.dir"));
+        try( FileWriter writer = new FileWriter(System.getProperty("user.dir") + File.separator + "output.txt")) {
             for (String res: result) {
                 writer.write(res + "\n");
             }
@@ -102,6 +145,5 @@ public class Main {
         catch (IOException ex){
             ex.printStackTrace();
         }
-
     }
 }
